@@ -50,7 +50,7 @@ class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Color(0xFF00BFFF),
 
       bottomNavigationBar: const ReusableBottomNav(selected: 2),
 
@@ -70,10 +70,24 @@ class _ReportPageState extends State<ReportPage> {
         centerTitle: true,
       ),
 
-      body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
+      body: isLoading
+          ? const Scaffold(
+              // ← bungkus dengan Scaffold putih sementara loading
+              backgroundColor: Color(0xFFF5F7FB),
+              body: Center(child: CircularProgressIndicator()),
+            )
+          : Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F7FB),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+              ),
+              // ── PERUBAHAN 3: padding top 16 di Column dipindah ke sini ──
+              // agar lengkungan tidak terpotong oleh padding lama
+              child: Column(
                 children: [
                   /// HEADER
                   Container(
@@ -475,7 +489,7 @@ class _ReportPageState extends State<ReportPage> {
                   ),
                 ],
               ),
-      ),
+            ),
     );
   }
 

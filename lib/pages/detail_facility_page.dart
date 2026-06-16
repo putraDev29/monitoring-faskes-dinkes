@@ -188,7 +188,7 @@ class _DetailFacilityPageState extends State<DetailFacilityPage> {
     final facility = data!.facility;
 
     return Scaffold(
-      backgroundColor: const Color(0xffF5F7FB),
+      backgroundColor: Color(0xFF00BFFF),
       bottomNavigationBar: const ReusableBottomNav(selected: 1),
 
       appBar: AppBar(
@@ -218,7 +218,17 @@ class _DetailFacilityPageState extends State<DetailFacilityPage> {
         ),
       ),
 
-      body: SafeArea(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF5F7FB),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
+        ),
+        // ── PERUBAHAN 3: padding top 16 di Column dipindah ke sini ──
+        // agar lengkungan tidak terpotong oleh padding lama
         child: Column(
           children: [
             /// HEADER

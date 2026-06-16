@@ -182,7 +182,7 @@ class _FacilitiesPageState extends State<FacilitiesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: Color(0xFF00BFFF),
 
       bottomNavigationBar: const ReusableBottomNav(selected: 1),
 
@@ -246,286 +246,304 @@ class _FacilitiesPageState extends State<FacilitiesPage> {
       ),
 
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // SEARCH
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-                  child: TextField(
-                    onChanged: (value) {
-                      searchQuery = value;
-                      applyFilter();
-                    },
-                    decoration: InputDecoration(
-                      hintText: "Cari fasilitas...",
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
+          ? const Scaffold(
+              // ← bungkus dengan Scaffold putih sementara loading
+              backgroundColor: Color(0xFFF5F7FB),
+              body: Center(child: CircularProgressIndicator()),
+            )
+          : Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F7FB),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+              ),
+              // ── PERUBAHAN 3: padding top 16 di Column dipindah ke sini ──
+              // agar lengkungan tidak terpotong oleh padding lama
+              child: Column(
+                children: [
+                  // SEARCH
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                    child: TextField(
+                      onChanged: (value) {
+                        searchQuery = value;
+                        applyFilter();
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Cari fasilitas...",
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                // FILTER
-                SizedBox(
-                  height: 42,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filters.length,
-                    itemBuilder: (context, index) {
-                      final filter = filters[index];
+                  // FILTER
+                  SizedBox(
+                    height: 42,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filters.length,
+                      itemBuilder: (context, index) {
+                        final filter = filters[index];
 
-                      final isSelected = selectedFilter == filter;
+                        final isSelected = selectedFilter == filter;
 
-                      Color selectedColor = const Color(0xFF0D47A1);
+                        Color selectedColor = const Color(0xFF0D47A1);
 
-                      if (filter.toLowerCase() == "tersedia") {
-                        selectedColor = Colors.green;
-                      } else if (filter.toLowerCase() == "terbatas") {
-                        selectedColor = Colors.orange;
-                      } else if (filter.toLowerCase() == "penuh") {
-                        selectedColor = Colors.red;
-                      }
+                        if (filter.toLowerCase() == "tersedia") {
+                          selectedColor = Colors.green;
+                        } else if (filter.toLowerCase() == "terbatas") {
+                          selectedColor = Colors.orange;
+                        } else if (filter.toLowerCase() == "penuh") {
+                          selectedColor = Colors.red;
+                        }
 
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedFilter = filter;
-                          });
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedFilter = filter;
+                            });
 
-                          applyFilter();
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          decoration: BoxDecoration(
-                            color: isSelected ? selectedColor : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: selectedColor.withOpacity(0.25),
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            getStatusName(filter),
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : selectedColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // LIST
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filteredFacilities.length,
-
-                    itemBuilder: (context, index) {
-                      final item = filteredFacilities[index];
-
-                      return Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(18),
-
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
-
-                          splashColor: Colors.black.withOpacity(0.05),
-
-                          highlightColor: Colors.black.withOpacity(0.08),
-
-                          onTap: () async {
-                            final result =
-                                await // cara panggil dari page sebelumnya
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => DetailFacilityPage(
-                                      hospitalId: widget.hospital.id,
-                                      facilityId: item.id,
-                                    ),
-                                  ),
-                                );
-
-                            // REFRESH SETELAH EDIT
-                            if (result == true) {
-                              getFacilities();
-                            }
+                            applyFilter();
                           },
                           child: Container(
-                            margin: const EdgeInsets.only(bottom: 14),
-                            padding: const EdgeInsets.all(14),
-
+                            margin: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.08),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                              color: isSelected ? selectedColor : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: selectedColor.withOpacity(0.25),
+                              ),
                             ),
-
-                            child: Row(
-                              children: [
-                                // ICON
-                                Container(
-                                  width: 54,
-                                  height: 54,
-
-                                  decoration: BoxDecoration(
-                                    color: getCardColor(
-                                      item.facilityType.color,
-                                    ).withOpacity(0.15),
-
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-
-                                  child: Image.asset(
-                                    getIconAsset(item.facilityType.name),
-                                    width: 24,
-                                    height: 24,
-                                  ),
-                                ),
-
-                                const SizedBox(width: 14),
-
-                                // CONTENT
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-
-                                    children: [
-                                      Text(
-                                        item.facilityType.name,
-
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 6),
-
-                                      Text(
-                                        "Tersedia ${item.availableUnit} dari ${item.totalUnit}",
-
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 8),
-
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-
-                                              child: LinearProgressIndicator(
-                                                value:
-                                                    item.availableUnit /
-                                                    item.totalUnit,
-
-                                                minHeight: 8,
-
-                                                backgroundColor:
-                                                    Colors.grey.shade200,
-
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                      Color
-                                                    >(
-                                                      getStatusColor(
-                                                        item.status,
-                                                      ),
-                                                    ),
-                                              ),
-                                            ),
-                                          ),
-
-                                          const SizedBox(width: 10),
-
-                                          Text(
-                                            "${item.percentage}%",
-
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(width: 12),
-
-                                // STATUS
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 7,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    color: getStatusColor(
-                                      item.status,
-                                    ).withOpacity(0.12),
-
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-
-                                  child: Text(
-                                    getStatusName(item.status),
-
-                                    style: TextStyle(
-                                      color: getStatusColor(item.status),
-
-                                      fontWeight: FontWeight.bold,
-
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-
-                                // ARROW ICON
-                                Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.grey.shade400,
-                                  size: 22,
-                                ),
-                              ],
+                            alignment: Alignment.center,
+                            child: Text(
+                              getStatusName(filter),
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : selectedColor,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 12),
+
+                  // LIST
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filteredFacilities.length,
+
+                      itemBuilder: (context, index) {
+                        final item = filteredFacilities[index];
+
+                        return Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(18),
+
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(18),
+
+                            splashColor: Colors.black.withOpacity(0.05),
+
+                            highlightColor: Colors.black.withOpacity(0.08),
+
+                            onTap: () async {
+                              final result =
+                                  await // cara panggil dari page sebelumnya
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => DetailFacilityPage(
+                                        hospitalId: widget.hospital.id,
+                                        facilityId: item.id,
+                                      ),
+                                    ),
+                                  );
+
+                              // REFRESH SETELAH EDIT
+                              if (result == true) {
+                                getFacilities();
+                              }
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 14),
+                              padding: const EdgeInsets.all(14),
+
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.08),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+
+                              child: Row(
+                                children: [
+                                  // ICON
+                                  Container(
+                                    width: 54,
+                                    height: 54,
+
+                                    decoration: BoxDecoration(
+                                      color: getCardColor(
+                                        item.facilityType.color,
+                                      ).withOpacity(0.15),
+
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+
+                                    child: Image.asset(
+                                      getIconAsset(item.facilityType.name),
+                                      width: 24,
+                                      height: 24,
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 14),
+
+                                  // CONTENT
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+
+                                      children: [
+                                        Text(
+                                          item.facilityType.name,
+
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 6),
+
+                                        Text(
+                                          "Tersedia ${item.availableUnit} dari ${item.totalUnit}",
+
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 8),
+
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+
+                                                child: LinearProgressIndicator(
+                                                  value:
+                                                      item.availableUnit /
+                                                      item.totalUnit,
+
+                                                  minHeight: 8,
+
+                                                  backgroundColor:
+                                                      Colors.grey.shade200,
+
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(
+                                                        getStatusColor(
+                                                          item.status,
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+
+                                            const SizedBox(width: 10),
+
+                                            Text(
+                                              "${item.percentage}%",
+
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 12),
+
+                                  // STATUS
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 7,
+                                    ),
+
+                                    decoration: BoxDecoration(
+                                      color: getStatusColor(
+                                        item.status,
+                                      ).withOpacity(0.12),
+
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+
+                                    child: Text(
+                                      getStatusName(item.status),
+
+                                      style: TextStyle(
+                                        color: getStatusColor(item.status),
+
+                                        fontWeight: FontWeight.bold,
+
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+
+                                  // ARROW ICON
+                                  Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.grey.shade400,
+                                    size: 22,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }

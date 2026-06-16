@@ -7,6 +7,7 @@ import 'package:monitoring_faskes_dinkes/models/hospital_model.dart';
 import 'package:monitoring_faskes_dinkes/models/notification_model.dart';
 import 'package:monitoring_faskes_dinkes/models/profile_model.dart';
 import 'package:monitoring_faskes_dinkes/models/report_model.dart';
+import 'package:monitoring_faskes_dinkes/models/examination_model.dart';
 import '../models/dashboard_model.dart';
 import '../utils/api_constant.dart';
 import 'auth_service.dart';
@@ -295,6 +296,217 @@ class ApiService {
       return data['count'];
     } catch (e) {
       throw Exception(e.toString());
+    }
+  }
+
+
+  static Future<List<Examination>> getHospitalExaminations(int id) async {
+    try {
+      String? token = await AuthService.getToken();
+
+      final response = await http.get(
+        Uri.parse('${ApiConstant.baseUrl}/dinkes/hospitals/$id/examinations'),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return (body['data'] as List<dynamic>)
+            .map((e) => Examination.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Gagal memuat pemeriksaan: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<List<Examination>> getExaminations() async {
+    try {
+      String? token = await AuthService.getToken();
+
+      final response = await http.get(
+        Uri.parse('${ApiConstant.baseUrl}dinkes/examinations'),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return (body['data'] as List<dynamic>)
+            .map((e) => Examination.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception(
+          'Gagal memuat data pemeriksaan: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<Examination> getExamination(int id) async {
+    try {
+      String? token = await AuthService.getToken();
+
+      final response = await http.get(
+        Uri.parse('${ApiConstant.baseUrl}/dinkes/examinations/$id'),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return Examination.fromJson(body['data'] as Map<String, dynamic>);
+      } else {
+        throw Exception('Pemeriksaan tidak ditemukan');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<List<User>> getDinkesUsers() async {
+    try {
+      String? token = await AuthService.getToken();
+
+      final response = await http.get(
+        Uri.parse('${ApiConstant.baseUrl}/dinkes/users'),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+
+        // Ambil list dari key 'data', filter hanya role 'admin'
+        final List list = body['data'] as List;
+
+        return list
+            .map((e) => User.fromJson(e as Map<String, dynamic>))
+            .where((u) => u.role == 'dinkes')
+            .toList();
+      } else {
+        throw Exception('Gagal memuat daftar dinkes: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ── POST /register ─────────────────────────────────────────────────────────
+  /// Tambah user baru dengan role admin (khusus admin_utama)
+  static Future<Map<String, dynamic>> createDinkesUser({
+    required String name,
+    required String email,
+    required String password,
+    required String phoneNumber,
+    required String address,
+  }) async {
+    try {
+      String? token = await AuthService.getToken();
+
+      final response = await http.post(
+        Uri.parse('${ApiConstant.baseUrl}/dinkes/register'),
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'password_confirmation': password,
+          'phone_number': phoneNumber,
+          'address': address,
+          'role': 'dinkes',
+        }),
+      );
+
+      final body = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {"statusCode": response.statusCode, "data": body};
+      } else {
+        // Tangkap pesan error dari backend (misal validasi duplikat email)
+        final message = body['message'] ?? 'Gagal menambahkan dinkes';
+        throw Exception(message);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateDinkesUser({
+    required int id,
+    required String name,
+    required String email,
+    required String phoneNumber,
+    required String address,
+    String? password,
+  }) async {
+    try {
+      final token = await AuthService.getToken();
+
+      final body = {
+        'name': name,
+        'email': email,
+        'phone_number': phoneNumber,
+        'address': address,
+      };
+
+      if (password != null && password.trim().isNotEmpty) {
+        body['password'] = password;
+      }
+
+      final response = await http.put(
+        Uri.parse('${ApiConstant.baseUrl}/dinkes/users/$id'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // ================= DELETE USER =================
+
+  static Future<Map<String, dynamic>> deleteDinkesUser(int id) async {
+    try {
+      final token = await AuthService.getToken();
+
+      final response = await http.delete(
+        Uri.parse('${ApiConstant.baseUrl}/dinkes/users/$id'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
     }
   }
 }

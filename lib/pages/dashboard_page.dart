@@ -20,15 +20,15 @@ class _DashboardPageState extends State<DashboardPage> {
   DashboardModel? dashboard;
   ProfileModel? profile;
 
-  final fcm = FCMService();
+  // final fcm = FCMService();
 
   Future<void> getData() async {
     dashboard = await ApiService.getDashboard();
     profile = await ApiService.getProfile();
     print("DATA : ${profile!.data.id}");
-    setState(() {
-      fcm.initFCM(profile!.data.id);
-    });
+    // setState(() {
+    //   fcm.initFCM(profile!.data.id);
+    // });
   }
 
   @override
