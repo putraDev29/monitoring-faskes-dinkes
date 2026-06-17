@@ -42,4 +42,26 @@ class AuthService {
 
     await prefs.clear();
   }
+
+  static Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConstant.baseUrl}/reset-password'),
+        headers: {'Accept': 'application/json'},
+        body: {
+          'email': email,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        },
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }

@@ -8,23 +8,23 @@ import 'package:monitoring_faskes_dinkes/utils/AuthWrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+  // FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
-  await LocalNotificationService.init();
+  // await LocalNotificationService.init();
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    LocalNotificationService.showNotification(message);
-  });
+  // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //   LocalNotificationService.showNotification(message);
+  // });
 
  await initializeDateFormatting('id_ID', null); // 🔥 WAJIB
   runApp(MyApp());
 }
 
-Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-}
+// Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp();
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
